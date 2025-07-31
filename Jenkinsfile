@@ -38,7 +38,7 @@ pipeline {
                 subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
                          <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                to: "${EMAIL_RECIPIENTS}",
+                to: "vinayprasad.testy@gmail.com",
                 mimeType: 'text/html'
             )
         }
@@ -50,14 +50,14 @@ pipeline {
                 subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
                          <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                to: "${EMAIL_RECIPIENTS}",
+                to: "vinayprasad.testy@gmail.com",
                 mimeType: 'text/html'
             )
         }
 
         always {
             emailext (
-                to: "${EMAIL_RECIPIENTS}",
+                to: "vinayprasad.testy@gmail.com",
                 subject: "Build Result: ${currentBuild.currentResult}",
                 body: """<p>Build finished with status: <b>${currentBuild.currentResult}</b></p>
                          <p>View it: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
