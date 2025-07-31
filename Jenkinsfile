@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'       // Must match Global Tool Config
-        jdk 'JDK17'         // Ensure this label matches what's in Jenkins > Global Tools
+        maven 'Maven'       // Ensure these names match Jenkins Global Tool Config
+        jdk 'JDK17'
     }
 
     environment {
@@ -35,34 +35,40 @@ pipeline {
         success {
             echo '✅ Build Successful. Sending Email...'
             emailext (
-                to: "vinayprasad.testy@gmail.com",
-                subject: "BUILD SUCCESS: Job ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "<p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>"
-
-
+                to: "${EMAIL_RECIPIENTS}",
+                subject: "✅ BUILD SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    <p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Logs</a></p>
+                """,
                 mimeType: 'text/html'
             )
         }
 
         failure {
-            echo '❌ Build Failed. Sending Email and Retrying...'
-
+            echo '❌ Build Failed. Sending Email...'
             emailext (
-                to: "vinayprasad.testy@gmail.com",
-                subject: "BUILD FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: "<p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>",
-
+                to: "${EMAIL_RECIPIENTS}",
+                subject: "❌ BUILD FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    <p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
+                    <p><a href="${env.BUILD_URL}">View Build Logs</a></p>
+                """,
                 mimeType: 'text/html'
             )
         }
 
         always {
+            echo '📧 Final Build Status Email...'
             emailext (
-                to: "vinayprasad.testy@gmail.com",
-                subject: "Build Result: ${currentBuild.currentResult}",
-                body: """<p>Build finished with status: <b>${currentBuild.currentResult}</b></p>",
-
-
+                to: "${EMAIL_RECIPIENTS}",
+                subject: "📦 Build Result: ${currentBuild.currentResult}",
+                body: """
+                    <p>Build finished with status: <b>${currentBuild.currentResult}</b></p>
+                    <p>Job: <b>${env.JOB_NAME}</b> | Build #: ${env.BUILD_NUMBER}</p>
+                    <p><a href="${env.BUILD_URL}">Open Build</a></p>
+                """,
+                mimeType: 'text/html'
             )
         }
     }
