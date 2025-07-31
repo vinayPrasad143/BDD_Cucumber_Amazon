@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'   // Make sure these are configured in Jenkins
-        jdk 'JDK17'     // Rename if needed in Global Tool Configuration
+        maven 'Maven'       // Must match Global Tool Config
+        jdk 'JDK17'         // Ensure this label matches what's in Jenkins > Global Tools
     }
 
     environment {
-
         EMAIL_RECIPIENTS = "vinayprasad.testy@gmail.com"
     }
 
@@ -20,50 +19,50 @@ pipeline {
 
         stage('Build and Execute Tests') {
             steps {
-                bat 'mvn clean test'
+                script {
+                    try {
+                        bat 'mvn clean test'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
             }
         }
-
-
-
     }
 
     post {
         success {
             echo '✅ Build Successful. Sending Email...'
             emailext (
-                subject: "SUCCESS",
-                body: """<p>✅ The build succeeded!</p>"""
-
+                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
+                         <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                 to: "${EMAIL_RECIPIENTS}",
-                mimeType: 'text/html; charset=UTF-8',
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                mimeType: 'text/html'
             )
         }
 
         failure {
             echo '❌ Build Failed. Sending Email and Retrying...'
-            emailext (
-                subject: "FAILURE",
-                body: """<p>❌ The build failed!</p>"""
 
+            emailext (
+                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """<p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
+                         <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                 to: "${EMAIL_RECIPIENTS}",
-                mimeType: 'text/html; charset=UTF-8',
-                recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+                mimeType: 'text/html'
             )
-            retry(2) {
-                bat 'mvn clean test'
-            }
         }
 
         always {
             emailext (
-                        to: "${EMAIL_RECIPIENTS}",
-                        subject: "Test",
-                        body: "Build finished.",
-                        attachLog: true,
-                        recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                    )
+                to: "${EMAIL_RECIPIENTS}",
+                subject: "Build Result: ${currentBuild.currentResult}",
+                body: """<p>Build finished with status: <b>${currentBuild.currentResult}</b></p>
+                         <p>View it: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
+                attachLog: true
+            )
         }
     }
 }
