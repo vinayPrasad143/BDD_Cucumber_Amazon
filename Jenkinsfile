@@ -35,10 +35,11 @@ pipeline {
         success {
             echo '✅ Build Successful. Sending Email...'
             emailext (
-                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """<p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
-                         <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                 to: "vinayprasad.testy@gmail.com",
+                subject: "BUILD SUCCESS: Job ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "<p>✅ The build succeeded for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>"
+
+
                 mimeType: 'text/html'
             )
         }
@@ -47,10 +48,10 @@ pipeline {
             echo '❌ Build Failed. Sending Email and Retrying...'
 
             emailext (
-                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """<p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>
-                         <p>Check it here: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
                 to: "vinayprasad.testy@gmail.com",
+                subject: "BUILD FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: "<p>❌ The build failed for <b>${env.JOB_NAME}</b> #${env.BUILD_NUMBER}.</p>",
+
                 mimeType: 'text/html'
             )
         }
@@ -59,9 +60,9 @@ pipeline {
             emailext (
                 to: "vinayprasad.testy@gmail.com",
                 subject: "Build Result: ${currentBuild.currentResult}",
-                body: """<p>Build finished with status: <b>${currentBuild.currentResult}</b></p>
-                         <p>View it: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></p>""",
-                attachLog: true
+                body: """<p>Build finished with status: <b>${currentBuild.currentResult}</b></p>",
+
+
             )
         }
     }
