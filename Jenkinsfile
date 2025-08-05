@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'       // Ensure these names match Jenkins Global Tool Config
+        maven 'Maven'       // Match the names in Jenkins -> Global Tool Configuration
         jdk 'JDK17'
     }
 
@@ -17,13 +17,13 @@ pipeline {
             }
         }
 
-        stage('Build and Execute Tests') {
+        stage('Build and Execute Tests in Docker') {
             steps {
                 script {
                     try {
-                    docker.image('maven:3.9.6-eclipse-temurin-17').inside {
-                        bat 'mvn clean test'
-                        }
+                        bat '''
+                        docker run --rm -v "%cd%":/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean test
+                        '''
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         throw e
