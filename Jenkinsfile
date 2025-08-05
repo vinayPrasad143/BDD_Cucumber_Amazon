@@ -33,7 +33,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Build Successful. Sending Email...'
+            echo '✅ Build Successful. Sending Email.....'
             emailext (
                 to: "${EMAIL_RECIPIENTS}",
                 subject: "✅ BUILD SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -46,7 +46,7 @@ pipeline {
         }
 
         failure {
-            echo '❌ Build Failed. Sending Email...'
+            echo '❌ Build Failed. Sending Email.....'
             emailext (
                 to: "${EMAIL_RECIPIENTS}",
                 subject: "❌ BUILD FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
@@ -59,7 +59,7 @@ pipeline {
         }
 
         always {
-            echo '📧 Final Build Status Email...'
+            echo '📧 Final Build Status Email.....'
             emailext (
                 to: "${EMAIL_RECIPIENTS}",
                 subject: "📦 Build Result: ${currentBuild.currentResult}",
