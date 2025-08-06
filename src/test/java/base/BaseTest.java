@@ -23,11 +23,12 @@ public class BaseTest {
         switch (browserName.toLowerCase()) {
             case "chrome":
                 ChromeOptions options = new ChromeOptions();
-                options.addArguments("--headless");
+                options.addArguments("--headless=new"); // 🆕 Use new headless mode
                 options.addArguments("--no-sandbox");
                 options.addArguments("--disable-dev-shm-usage");
                 options.addArguments("--disable-gpu");
                 options.addArguments("--remote-allow-origins=*");
+                options.addArguments("--window-size=1920,1080"); // 🆕 ensure layout loads correctly
                 driver = new ChromeDriver(options);
                 break;
 
@@ -44,7 +45,10 @@ public class BaseTest {
                 throw new RuntimeException("Unsupported browser");
         }
 
-        driver.manage().window().maximize();
+        // Only maximize if not headless (maximizing in headless sometimes throws)
+        if (!browserName.equalsIgnoreCase("chrome") || !driver.toString().contains("headless")) {
+            driver.manage().window().maximize();
+        }
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         driver.get(ConfigReader.getProperty("url"));
