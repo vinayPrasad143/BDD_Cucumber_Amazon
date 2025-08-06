@@ -127,8 +127,6 @@ VCS	Git + GitHub
 
 ✅ Allure Reporting Integration
 
-✅ Jenkins CI/CD Pipeline
-
 ✅ Docker Grid Execution Support
 
 ✅ Page Factory / Fluent Wait Refactor
