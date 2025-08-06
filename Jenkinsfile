@@ -22,7 +22,8 @@ pipeline {
                 script {
                     try {
                         bat '''
-                        docker run --rm -v "%cd%":/app -w /app maven:3.9.6-eclipse-temurin-17 mvn clean test
+                        docker build -t selenium-tests .
+                        docker run --rm selenium-tests mvn clean test
                         '''
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
