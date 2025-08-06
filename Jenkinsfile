@@ -22,9 +22,18 @@ pipeline {
                 script {
                     try {
                         bat '''
-                        docker build -t selenium-tests .
-                        docker run --rm selenium-tests mvn clean test
-                        '''
+                                        echo Current Dir:
+                                        cd
+                                        echo Directory contents:
+                                        dir
+
+                                        echo Building Docker image...
+                                        docker build -t selenium-tests .
+
+                                        echo Running Tests in Docker...
+                                        docker run --rm selenium-tests mvn clean test
+                               '''
+
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         throw e
