@@ -1,31 +1,39 @@
-# Use Maven with JDK 17 (or your preferred version)
-FROM maven:3.9.9-eclipse-temurin-17 AS build
+# Base image with Java & Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
-# Install Chrome browser
-RUN apt-get update && apt-get install -y \
-    wget \
-    unzip \
-    curl \
-    gnupg \
-    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
-    && apt-get update && apt-get install -y google-chrome-stable
-
-# Download ChromeDriver that matches Chrome version
-RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
-    DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json" | \
-    grep -B1 $CHROME_VERSION | grep version | head -n1 | cut -d '"' -f4) && \
-    wget https://storage.googleapis.com/chrome-for-testing-public/$DRIVER_VERSION/linux64/chromedriver-linux64.zip && \
-    unzip chromedriver-linux64.zip && \
-    mv chromedriver-linux64/chromedriver /usr/bin/chromedriver && \
-    chmod +x /usr/bin/chromedriver && \
-    rm -rf chromedriver-linux64*
-
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy project files
-COPY . /app
+# Copy all project files
+COPY . .
 
-# Run Maven tests
-CMD ["mvn", "clean", "test"]
+# Optional: Resolve dependencies first (for caching)
+RUN mvn dependency:resolve
+
+# Package the tests (but skip tests to avoid running them now)
+RUN mvn clean install -DskipTests
+
+# =====================
+# Runtime image
+# =====================
+FROM eclipse-temurin:17-jdk
+
+# Set working directory
+WORKDIR /app
+
+# Install Chrome (new stable version)
+RUN apt-get update && apt-get install -y wget gnupg2 unzip \
+    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Chrome as default display size (needed for headless)
+ENV CHROME_BIN=/usr/bin/google-chrome
+ENV DISPLAY=:99
+
+# Copy built project from builder
+COPY --from=builder /app /app
+
+# Run tests using Chrome in headless mode
+CMD ["mvn", "test", "-Dbrowser=chrome"]
