@@ -1,5 +1,5 @@
 # Use Maven image with JDK 17 (can be changed to JDK 11 if needed)
-FROM maven:3.8.8-openjdk-17
+FROM maven:3.9.6-eclipse-temurin-17
 
 # Install Chrome
 RUN apt-get update && apt-get install -y wget gnupg2
