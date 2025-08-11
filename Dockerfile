@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline -B
 
 # Copy source and build (include tests)
 COPY . .
-RUN mvn clean package -DskipTests=false
+RUN mvn clean package -DskipTests
 
 # ------------------------------
 # Stage 2: Runtime with Chrome + ChromeDriver
