@@ -2,41 +2,23 @@
 # Stage 1: Build with Maven
 # ------------------------------
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
-
 WORKDIR /app
-
-# Copy pom.xml and download dependencies (cache layer)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
-
-# Copy source and build (include tests)
 COPY . .
-RUN mvn clean package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
+RUN mvn clean package -DskipTests
 
 # ------------------------------
 # Stage 2: Runtime with Chrome + ChromeDriver
 # ------------------------------
 FROM eclipse-temurin:17-jdk
-
 WORKDIR /app
 
 # Install Chrome dependencies
 RUN apt-get update && apt-get install -y \
-    wget \
-    curl \
-    unzip \
-    gnupg \
-    libglib2.0-0 \
-    libnss3 \
-    libfontconfig1 \
-    libxss1 \
-    libasound2t64 \
-    fonts-liberation \
-    libappindicator3-1 \
-    libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    ca-certificates \
-    --no-install-recommends && \
+    wget curl unzip gnupg libglib2.0-0 libnss3 libfontconfig1 libxss1 \
+    libasound2t64 fonts-liberation libappindicator3-1 libatk-bridge2.0-0 \
+    libgtk-3-0 ca-certificates --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome Stable
@@ -52,9 +34,8 @@ RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
     unzip chromedriver-linux64.zip -d /usr/local/bin/ && \
     rm chromedriver-linux64.zip
 
-# Copy compiled tests from builder stage
-COPY --from=builder /app/target/*.jar /app/tests.jar
-COPY --from=builder /app/target/lib /app/lib
+# Copy fat jar
+COPY --from=builder /app/target/*-shaded.jar /app/tests.jar
 
-# Run TestNG tests using testng.xml
-CMD ["java", "-cp", "/app/tests.jar:/app/lib/*", "org.testng.TestNG", "testng.xml"]
+# Run TestNG tests
+CMD ["java", "-cp", "/app/tests.jar", "org.testng.TestNG", "testng.xml"]
