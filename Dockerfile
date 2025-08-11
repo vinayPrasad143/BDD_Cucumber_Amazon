@@ -58,4 +58,5 @@ RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
 COPY --from=builder /app/target /app/target
 
 # Default command (you can override in docker run)
-CMD ["java", "-jar", "target/your-selenium-tests.jar"]
+#CMD ["java", "-jar", "target/your-selenium-tests.jar"]
+CMD ["mvn", "test"]
