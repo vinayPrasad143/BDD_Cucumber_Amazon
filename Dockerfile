@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline -B
 
 # Copy source and build (include tests)
 COPY . .
-RUN mvn clean package -DskipTests
+RUN mvn clean package dependency:copy-dependencies -DoutputDirectory=target/lib -DincludeScope=runtime
 
 # ------------------------------
 # Stage 2: Runtime with Chrome + ChromeDriver
