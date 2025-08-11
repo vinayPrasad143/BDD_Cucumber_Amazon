@@ -38,4 +38,4 @@ RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
 COPY --from=builder /app/target/*-shaded.jar /app/tests.jar
 
 # Run TestNG tests
-CMD ["java", "-cp", "/app/tests.jar", "org.testng.TestNG", "testng.xml"]
+CMD ["java", "-jar", "/app/tests.jar", "testng.xml"]
