@@ -54,6 +54,7 @@ RUN CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+') && \
 
 # Copy compiled tests from builder stage
 COPY --from=builder /app/target/*.jar /app/tests.jar
+COPY --from=builder /app/target/lib /app/lib
 
 # Run TestNG tests using testng.xml
 CMD ["java", "-cp", "/app/tests.jar:/app/lib/*", "org.testng.TestNG", "testng.xml"]
