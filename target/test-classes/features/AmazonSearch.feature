@@ -13,6 +13,6 @@ Feature: Amazon Product search
     Examples:
   | product      |
   | headphones   |
-  #| laptop bag   |
+  | laptop bag   |
   | xyzproductnotexist |  
 
